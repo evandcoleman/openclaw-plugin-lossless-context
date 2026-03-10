@@ -1,0 +1,50 @@
+{
+  "id": "openclaw-plugin-lossless-context",
+  "name": "Lossless Context Engine",
+  "version": "0.1.0",
+  "description": "Vector-backed memory that survives compaction",
+  "entryPoint": "dist/index.js",
+  "slots": {
+    "contextEngine": "lossless"
+  },
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "retrievalCount": {
+        "type": "number",
+        "default": 20,
+        "description": "Maximum number of historical messages to retrieve"
+      },
+      "windowShare": {
+        "type": "number",
+        "default": 0.6,
+        "minimum": 0.1,
+        "maximum": 0.9,
+        "description": "Fraction of token budget allocated to recent window (vs retrieval)"
+      },
+      "recencyDecayHours": {
+        "type": "number",
+        "default": 168,
+        "description": "Half-life for recency decay in hours (default: 1 week)"
+      },
+      "skipHeartbeats": {
+        "type": "boolean",
+        "default": true,
+        "description": "Skip ingesting heartbeat messages"
+      },
+      "maxDbSizeMb": {
+        "type": "number",
+        "default": 500,
+        "description": "Maximum database size in MB before pruning"
+      },
+      "minSimilarity": {
+        "type": "number",
+        "default": 0.3,
+        "minimum": 0,
+        "maximum": 1,
+        "description": "Minimum similarity score for retrieval (0-1)"
+      }
+    },
+    "additionalProperties": false
+  }
+}
