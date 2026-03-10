@@ -7,7 +7,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { randomUUID } from "node:crypto";
 import { unlinkSync } from "node:fs";
-import type { AgentMessage } from "openclaw/plugin-sdk/context-engine";
+import type { AgentMessage } from "@mariozechner/pi-agent-core";
 
 // Mock fetch for embedding service
 global.fetch = vi.fn();

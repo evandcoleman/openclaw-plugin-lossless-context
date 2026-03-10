@@ -28,6 +28,7 @@
     "url": "https://github.com/evandcoleman/openclaw-plugin-lossless-context"
   },
   "peerDependencies": {
+    "@mariozechner/pi-agent-core": "*",
     "openclaw": ">=2026.3.7"
   },
   "dependencies": {

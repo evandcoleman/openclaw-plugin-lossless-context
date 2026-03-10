@@ -1,4 +1,5 @@
 import type {
+  AgentMessage,
   ContextEngine,
   ContextEngineInfo,
   IngestResult,
@@ -8,11 +9,10 @@ import type {
   BootstrapResult,
   SubagentSpawnPreparation,
   SubagentEndReason,
-  AgentMessage,
-} from "openclaw/plugin-sdk/context-engine";
+  PluginConfig,
+} from "./types.js";
 import { MessageStore } from "./db.js";
 import { EmbeddingService } from "./embeddings.js";
-import type { PluginConfig } from "./types.js";
 
 export class LosslessContextEngine implements ContextEngine {
   readonly info: ContextEngineInfo = {
@@ -51,9 +51,10 @@ export class LosslessContextEngine implements ContextEngine {
     isHeartbeat?: boolean;
   }): Promise<IngestResult> {
     const { sessionId, message, isHeartbeat } = params;
+    const msg = message as any;
 
-    // Skip system messages
-    if (message.role === "system") {
+    // Skip system messages (if role exists)
+    if (msg.role === "system") {
       return { ingested: false };
     }
 
@@ -76,9 +77,9 @@ export class LosslessContextEngine implements ContextEngine {
 
     // Store the message
     this.store.insertMessage({
-      id: message.id,
+      id: msg.id || `msg-${Date.now()}`,
       sessionId,
-      role: message.role,
+      role: msg.role || "unknown",
       content,
       embedding,
       tokenCount,
@@ -102,7 +103,8 @@ export class LosslessContextEngine implements ContextEngine {
 
     // Filter out system messages and heartbeats
     const filteredMessages = messages.filter(msg => {
-      if (msg.role === "system") return false;
+      const m = msg as any;
+      if (m.role === "system") return false;
       if (isHeartbeat && this.config.skipHeartbeats) return false;
       return true;
     });
@@ -119,15 +121,15 @@ export class LosslessContextEngine implements ContextEngine {
 
     // Store all messages
     for (let i = 0; i < filteredMessages.length; i++) {
-      const msg = filteredMessages[i];
+      const msg = filteredMessages[i] as any;
       const content = contents[i];
       const embedding = embeddings[i];
       const tokenCount = Math.ceil(content.length / 4);
 
       this.store.insertMessage({
-        id: msg.id,
+        id: msg.id || `msg-${Date.now()}-${i}`,
         sessionId,
-        role: msg.role,
+        role: msg.role || "unknown",
         content,
         embedding,
         tokenCount,
@@ -160,6 +162,7 @@ export class LosslessContextEngine implements ContextEngine {
 
     for (let i = messages.length - 1; i >= 0; i--) {
       const msg = messages[i];
+      const m = msg as any;
       const content = this.getMessageContent(msg);
       const msgTokens = content ? Math.ceil(content.length / 4) : 10;
       
@@ -168,13 +171,13 @@ export class LosslessContextEngine implements ContextEngine {
       }
 
       windowMessages.unshift(msg);
-      windowIds.add(msg.id);
+      windowIds.add(m.id || `msg-${i}`);
       windowTokens += msgTokens;
     }
 
     // Build search query from recent user messages
     const recentUserMessages = windowMessages
-      .filter(msg => msg.role === "user")
+      .filter(msg => (msg as any).role === "user")
       .slice(-3)
       .map(msg => this.getMessageContent(msg))
       .filter(Boolean)
@@ -292,16 +295,24 @@ export class LosslessContextEngine implements ContextEngine {
   }
 
   private getMessageContent(message: AgentMessage): string {
-    if (typeof message.content === "string") {
-      return message.content;
+    const msg = message as any;
+    
+    // Handle different message content formats
+    if (typeof msg.content === "string") {
+      return msg.content;
     }
     
-    if (Array.isArray(message.content)) {
+    if (Array.isArray(msg.content)) {
       // Extract text from content blocks
-      return message.content
+      return msg.content
         .filter((block: any) => block.type === "text")
         .map((block: any) => block.text)
         .join(" ");
+    }
+    
+    // For messages with text field
+    if (msg.text) {
+      return msg.text;
     }
     
     return "";
