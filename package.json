@@ -20,6 +20,9 @@
     "lint": "tsc --noEmit",
     "prepublishOnly": "npm run build"
   },
+  "openclaw": {
+    "extensions": ["./dist/index.js"]
+  },
   "keywords": ["openclaw", "plugin", "context-engine", "memory", "vector", "sqlite"],
   "author": "Evan Coleman",
   "license": "MIT",

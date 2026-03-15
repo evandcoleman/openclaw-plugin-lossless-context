@@ -25,20 +25,28 @@ export function resolveConfig(userConfig?: OpenClawPluginConfig): PluginConfig {
 }
 
 /**
- * Resolve embedding configuration from OpenClaw's memory search settings
- * Falls back to environment variables or defaults
+ * Resolve embedding configuration from plugin config, then environment variables
  */
-export function resolveEmbeddingConfig(): {
+export function resolveEmbeddingConfig(pluginConfig?: {
+  embedding?: {
+    apiKey?: string;
+    model?: string;
+    baseUrl?: string;
+    dimensions?: number;
+  };
+}): {
   apiKey: string;
   model: string;
   baseUrl: string;
   dimensions: number;
 } {
-  // Try to get from environment variables
-  const apiKey = process.env.OPENAI_API_KEY || "";
-  const model = process.env.EMBEDDING_MODEL || "text-embedding-3-small";
-  const baseUrl = process.env.EMBEDDING_BASE_URL || "https://api.openai.com/v1";
-  const dimensions = parseInt(process.env.EMBEDDING_DIMENSIONS || "1536", 10);
+  const embeddingConfig = pluginConfig?.embedding;
+
+  // Plugin config takes priority, then env vars, then defaults
+  const apiKey = embeddingConfig?.apiKey || process.env.OPENAI_API_KEY || "";
+  const model = embeddingConfig?.model || process.env.EMBEDDING_MODEL || "text-embedding-3-small";
+  const baseUrl = embeddingConfig?.baseUrl || process.env.EMBEDDING_BASE_URL || "https://api.openai.com/v1";
+  const dimensions = embeddingConfig?.dimensions || parseInt(process.env.EMBEDDING_DIMENSIONS || "1536", 10);
 
   return {
     apiKey,

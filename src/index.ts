@@ -8,7 +8,7 @@ import { mkdirSync } from "node:fs";
 
 export default function register(api: OpenClawPluginApi) {
   const config = resolveConfig(api.pluginConfig);
-  const embeddingConfig = resolveEmbeddingConfig();
+  const embeddingConfig = resolveEmbeddingConfig(api.pluginConfig);
 
   api.registerContextEngine("lossless", () => {
     // Resolve database path within OpenClaw state directory
