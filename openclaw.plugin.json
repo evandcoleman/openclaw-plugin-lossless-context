@@ -1,0 +1,86 @@
+{
+  "id": "lossless-context",
+  "kind": "contextEngine",
+  "uiHints": {
+    "retrievalCount": {
+      "label": "Retrieval Count",
+      "placeholder": "20",
+      "help": "Maximum number of historical messages to retrieve"
+    },
+    "windowShare": {
+      "label": "Window Share",
+      "placeholder": "0.6",
+      "help": "Fraction of token budget for recent window (vs retrieval)"
+    },
+    "recencyDecayHours": {
+      "label": "Recency Decay (hours)",
+      "placeholder": "168",
+      "help": "Half-life for recency decay (default: 1 week)"
+    },
+    "skipHeartbeats": {
+      "label": "Skip Heartbeats",
+      "help": "Don't ingest heartbeat messages"
+    },
+    "maxDbSizeMb": {
+      "label": "Max DB Size (MB)",
+      "placeholder": "500",
+      "help": "Maximum database size before pruning old messages"
+    },
+    "minSimilarity": {
+      "label": "Min Similarity",
+      "placeholder": "0.3",
+      "help": "Minimum similarity score for retrieval (0-1)"
+    }
+  },
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "retrievalCount": {
+        "type": "number",
+        "minimum": 1,
+        "maximum": 100
+      },
+      "windowShare": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+      },
+      "recencyDecayHours": {
+        "type": "number",
+        "minimum": 1
+      },
+      "skipHeartbeats": {
+        "type": "boolean"
+      },
+      "maxDbSizeMb": {
+        "type": "number",
+        "minimum": 10
+      },
+      "minSimilarity": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+      },
+      "embedding": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "apiKey": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "baseUrl": {
+            "type": "string"
+          },
+          "dimensions": {
+            "type": "number"
+          }
+        },
+        "required": ["apiKey"]
+      }
+    }
+  }
+}
